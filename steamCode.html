@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script>
+		document.addEventListener('DOMContentLoaded', bindButtons);
+		
+		function bindButtons(){
+			document.getElementById('vanitySubmit').addEventListener('click', function(event){
+				var req = new XMLHttpRequest();
+				
+				var vanity = "";
+				vanity = document.getElementById('vanityURL').value;
+				console.log('Requesting SteamID for ' + vanity);
+
+				req.open("GET", 'http://flip3.engr.oregonstate.edu:23236/get-steamid/?vname=' + vanity, true);
+					
+				req.addEventListener('load',function(){
+					if(req.status >= 200 && req.status < 400){
+						var response = JSON.parse(req.responseText);
+						document.getElementById('vanityName').textContent = vanity;
+						console.log(response.response.steamid);
+						document.getElementById('steamID').textContent = response.response.steamid;
+					}
+					else{
+						console.log("Error in network request: " + request.statusText);
+						
+					}});
+				req.send(null);
+
+				event.preventDefault();
+
+			})
+			
+			document.getElementById('playerSubmit').addEventListener('click', function(event){
+				var req = new XMLHttpRequest();
+				
+				var steamID = "";
+				steamID = document.getElementById('playerID').value;
+				console.log('Looking up player with ID: ' + steamID);
+
+				req.open("GET", 'http://flip3.engr.oregonstate.edu:23236/player-lookup/?pid=' + steamID, true);
+					
+				req.addEventListener('load',function(){
+					if(req.status >= 200 && req.status < 400){
+					console.log(req.responseText);
+						var response = JSON.parse(req.responseText);
+						document.getElementById('personaName').textContent = response.response.players[0].personaname;
+						document.getElementById('playerSteamID').textContent = response.response.players[0].steamid;
+						document.getElementById('realName').textContent = response.response.players[0].realname;
+					}
+					else{
+						console.log("Error in network request: " + request.statusText);
+						
+					}});
+				req.send(null);
+
+				event.preventDefault();
+
+			})
+			
+			document.getElementById('cheaterSubmit').addEventListener('click', function(event){
+				var req = new XMLHttpRequest();
+				
+				var steamID = "";
+				steamID = document.getElementById('friendCheaterID').value;
+				console.log('Looking up player with ID: ' + steamID);
+
+				req.open("GET", 'http://flip3.engr.oregonstate.edu:23236/cheater-lookup/?pid=' + steamID, true);
+					
+				req.addEventListener('load',function(){
+					if(req.status >= 200 && req.status < 400){
+						var response = JSON.parse(req.responseText);
+						
+						var clearDom = document.getElementById("cheaterTable");
+						while(clearDom.firstChild){
+							clearDom.removeChild(clearDom.firstChild);
+						}
+						
+
+						if(response.response.players.length == 0){
+						var cheaters = document.getElementById("cheaterTable");
+						var newItem = document.createElement("h3");
+						newItem.appendChild(document.createTextNode("No Cheaters Found"));
+						cheaters.appendChild(newItem);
+						}
+						else{
+							var cheaters = document.getElementById("cheaterTable");
+							var newTable = document.createElement("table");
+							var newBody = document.createElement("tbody");
+							
+							var newRow = document.createElement('tr');
+							var newItem = document.createElement('th')
+							newItem.appendChild(document.createTextNode("Persona"));
+							newItem.style.border = "1px solid black";
+							newRow.appendChild(newItem);
+							var newItem2 = document.createElement('th')
+							newItem2.appendChild(document.createTextNode("Steam ID"));
+							newRow.appendChild(newItem2);
+							newItem2.style.border = "1px solid black";
+							var newItem3 = document.createElement('th')
+							newItem3.appendChild(document.createTextNode("Real Name"));
+							newRow.appendChild(newItem3);
+							newItem3.style.border = "1px solid black";
+							newBody.appendChild(newRow);
+							cheaters.appendChild(newBody);
+							
+							for(var i = 0; i < response.response.players.length; i++){
+								var newRow = document.createElement("tr");
+								var playerNameCell = document.createElement("td");
+								playerNameCell.appendChild(document.createTextNode(response.response.players[i].personaname));
+								playerNameCell.style.border = "1px solid black";
+								newRow.appendChild(playerNameCell);
+								var steamIdCell = document.createElement("td");
+								steamIdCell.appendChild(document.createTextNode(response.response.players[i].steamid));
+								steamIdCell.style.border = "1px solid black";
+								newRow.appendChild(steamIdCell);
+								var realNameCell = document.createElement("td");
+								realNameCell.appendChild(document.createTextNode(response.response.players[i].realname));
+								realNameCell.style.border = "1px solid black";
+								newRow.appendChild(realNameCell);
+								newBody.appendChild(newRow);
+							}
+							newTable.appendChild(newBody);
+							newTable.style.border = "1px solid black";
+							cheaters.appendChild(newTable);
+						}
+
+
+					}
+					else{
+						console.log("Error in network request: " + request.statusText);
+						
+					}});
+				req.send(null);
+
+				event.preventDefault();
+
+			})
+		}
+
+    </script>
+  </head>
+  <body>
+  
+      <form>
+      <fieldset>
+        <legend>Steam ID Lookup</legend>
+        <label for="vanityURL">Vanity URL Name:</label>
+		<input type="text" name="vanityURL" id="vanityURL">
+		<h6>The Vanity URL Name is the last part of the URL just below steam's navigation menu on a user's profile, generally the part following http://steamcomminity.com/id/</h6>
+        <input type="submit" id="vanitySubmit">
+      </fieldset>
+    </form>
+	
+	    <div>
+      <h2>Steam ID Lookup Result</h2>
+      <ul>
+        <li><span>Vanity Name: </span><span id="vanityName"></span></li>
+       <li><span>SteamID: </span><span id="steamID"></span></li>
+      </ul>
+    </div>
+	
+	<form>
+      <fieldset>
+        <legend>Player Lookup</legend>
+        <label for="vanityURL">Steam ID:</label>
+		<input type="text" name="playerID" id="playerID">
+		<h6>The Vanity URL Name is the last part of the URL just below steam's navigation menu on a user's profile, generally the part following http://steamcomminity.com/id/</h6>
+        <input type="submit" id="playerSubmit">
+      </fieldset>
+    </form>
+	
+	    <div>
+      <h2>Player Info</h2>
+      <ul>
+        <li><span>Persona Name: </span><span id="personaName"></span></li>
+		<li><span>Real Name: </span><span id="realName"></span></li>
+       <li><span>SteamID: </span><span id="playerSteamID"></span></li>
+      </ul>
+    </div>
+	
+		<form>
+      <fieldset>
+        <legend>Check a User's Friends for VAC Cheaters</legend>
+        <label for="vanityURL">Steam ID:</label>
+		<input type="text" name="friendCheaterIDID" id="friendCheaterID">
+		<h6>The Vanity URL Name is the last part of the URL just below steam's navigation menu on a user's profile, generally the part following http://steamcomminity.com/id/</h6>
+        <input type="submit" id="cheaterSubmit">
+      </fieldset>
+    </form>
+	<h2>User's Friends who are Banned</h2>
+	<h5>Note: a player's real name is only available on public profiles, and will show undefined if private.</h5>
+	<h5>An example Steam ID to check is 76561198077638152, which has a number of banned friends</h5>
+	<div id ="cheaterTable">
+
+    </div>
+  </body>
+</html>
